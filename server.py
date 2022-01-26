@@ -56,11 +56,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
         elif not os.path.realpath(f"./www/{path}").startswith(os.path.realpath("./www")):
             response = self.send_response(STATUS_404)
 
-        # Check if dir
+        # Check if dir path correct
         elif os.path.isdir(f"./www/{path}") and not path.endswith('/'):
             response = self.send_response(STATUS_301, location=f"{path}/")
 
-        # If requesting a specific file
+        # If requesting file or dir
         elif os.path.exists(f"./www/{path}"):
             is_dir = os.path.isdir(f"./www/{path}") and path.endswith('/')
             path = f"{path}/index.html" if is_dir else path
