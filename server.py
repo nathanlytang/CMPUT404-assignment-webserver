@@ -31,7 +31,7 @@ from email.utils import formatdate
 
 
 class MyWebServer(socketserver.BaseRequestHandler):
-    
+
     def handle(self):
         '''
         Handle HTTP requests and return HTTP responses
@@ -60,20 +60,10 @@ class MyWebServer(socketserver.BaseRequestHandler):
         elif os.path.isdir(f"./www/{path}") and not path.endswith('/'):
             response = self.send_response(STATUS_301, location=f"{path}/")
 
-        # If requesting a dir
-        elif os.path.isdir(f"./www/{path}") and path.endswith('/'):
-            file = open(f"./www/{path}/index.html", "r")
-            lines = file.read()
-            file.close()
-            content = {
-                'content': lines,
-                'length': len(lines.encode(ENCODING)),
-                'type': f"text/html; charset={ENCODING}"
-            }
-            response = self.send_response(STATUS_200, content=content)
-
         # If requesting a specific file
         elif os.path.exists(f"./www/{path}"):
+            is_dir = os.path.isdir(f"./www/{path}") and path.endswith('/')
+            path = f"{path}/index.html" if is_dir else path
             file = open(f"./www/{path}", "r")
             lines = file.read()
             file.close()
@@ -82,6 +72,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 'length': len(lines.encode(ENCODING)),
                 'type': mimetypes.guess_type(f"./www/{path}")[0]
             }
+            if is_dir:
+                content['type'] += f"; charset={ENCODING}"
             response = self.send_response(STATUS_200, content=content)
 
         # Return 404 if nothing is found
@@ -90,7 +82,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
         return self.request.sendall(bytearray(response, ENCODING))
 
-    def send_response(self, status, content = None, location = None):
+    def send_response(self, status, content=None, location=None):
         '''
         Build the response for the request using HTTP headers and body
 
@@ -122,6 +114,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             response += f"Content-Length: {content['length']}\r\n"
             response += f"\r\n{content['content']}"
         return response
+
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
