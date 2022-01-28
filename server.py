@@ -103,6 +103,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         response = f"{status['message']}\r\n"
         response += f"Server: nathanlytang/0.1\r\n"
         response += f"Date: {formatdate(timeval=None, localtime=False, usegmt=True)}\r\n"
+        response += f"Connection: close\r\n"
         if status['code'] == 405:
             response += f"Allow: GET\r\n"
         # Redirect to proper location if 301
